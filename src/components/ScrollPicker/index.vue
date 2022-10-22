@@ -13,7 +13,7 @@
             'deg) translateZ(' +
             zDistance +
             'px)',
-        }" v-for="(item, index) in data" :key="index">
+        }" v-for="(item, index) in dataList" :key="index">
           {{ item.label }}
         </div>
       </div>
@@ -27,6 +27,7 @@ export default {
   props: ["data"],
   data() {
     return {
+      dataList: [{ label: "暂无数据", _index: 0 }],
       // 数据总个数
       total: 0,
       // 每个div高度
@@ -49,14 +50,10 @@ export default {
       isTouch: false,
     };
   },
-  mounted() {
-    // 初始化数据
-    this.init();
-  },
   methods: {
     init() {
       // 记录数据总个数
-      this.total = this.data.length;
+      this.total = this.dataList.length;
       // 平均各个div的旋转角度
       this.rotateRate = 180 / this.total;
       // 计算轴距
@@ -126,6 +123,26 @@ export default {
       }
     }
   },
+  watch: {
+    data: {
+      handler(value) {
+        // 如果有传入数据则为数据添加 index 
+        if (value.length) {
+          const list = []
+          // 
+          for (let i = 0; i < value.length; ++i) {
+            let item = value[i]
+            item["_index"] = i
+            list.push(item)
+          }
+          this.dataList = list
+        }
+        // 初始化组件
+        this.init()
+      },
+      immediate: true
+    }
+  }
 };
 </script>
 <style lang='scss' scoped>

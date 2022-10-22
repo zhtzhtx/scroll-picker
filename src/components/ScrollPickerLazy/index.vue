@@ -26,6 +26,8 @@ export default {
   props: ["data", "limit"],
   data() {
     return {
+      // 初始数据
+      dataList: [{ label: "暂无数据", _index: 0 }],
       // 触发懒加载的最小值
       min: 0,
       // 触发懒加载的最大值
@@ -56,18 +58,11 @@ export default {
       isTouch: false,
     };
   },
-  mounted() {
-    // 初始化数据
-    this.init();
-  },
   methods: {
     init() {
-      this.data.forEach((item, index) => {
-        this.$set(item, "_index", index);
-      });
       // 展示数据
       this.currentData =
-        this.data.length > this.limit ? this.data.slice(0, this.limit) : this.data;
+        this.dataList.length > this.limit ? this.dataList.slice(0, this.limit) : this.dataList;
       // 平均各个div的旋转角度
       this.rotateRate = 180 / this.currentData.length;
       // 计算轴距
@@ -75,7 +70,7 @@ export default {
       // 设置触发懒加载的最大值
       this.max = this.limit - 2
       // 设置所有数据的结束index
-      this.endIndex = this.data.length - 1
+      this.endIndex = this.dataList.length - 1
     },
     mousedown(e) {
       // 记录点击的鼠标位置
@@ -160,15 +155,15 @@ export default {
           startIndex = turningIndex - 1 < 0 ? 0 : parseInt(turningIndex - 1);
           // 获取区间结束index
           endIndex =
-            startIndex + this.limit > this.data.length
-              ? this.data.length
+            startIndex + this.limit > this.dataList.length
+              ? this.dataList.length
               : startIndex + this.limit;
         } else {
           // 如果是小于最小值情况
           // 获取区间结束index
           endIndex =
-            turningIndex + 2 > this.data.length
-              ? this.data.length
+            turningIndex + 2 > this.dataList.length
+              ? this.dataList.length
               : parseInt(turningIndex + 2);
           // 获取区间开始index
           startIndex =
@@ -177,11 +172,9 @@ export default {
               : endIndex - this.limit;
         }
         // 截取当前展示的数组
-        this.currentData = this.data.slice(startIndex, endIndex);
+        this.currentData = this.dataList.slice(startIndex, endIndex);
         // 获取当前转动对应当前展示数组中的index
-        console.log(turningIndex, startIndex)
         this.currentIndex = turningIndex - startIndex;
-        console.log(this.currentIndex)
         // 更新触发懒加载的最小值
         this.min = this.currentData[0]._index + 1
         // 更新触发懒加载的最大值
@@ -190,11 +183,30 @@ export default {
         // 不需要懒加载
         const startIndex = this.currentData[0]._index
         this.currentIndex = turningIndex - startIndex
-        console.log(this.currentIndex)
       }
       this.currentRotate = this.currentIndex * this.rotateRate;
     }
   },
+  watch: {
+    data: {
+      handler(value) {
+        // 如果有传入数据则为数据添加 index 
+        if (value.length) {
+          const list = []
+          // 
+          for (let i = 0; i < value.length; ++i) {
+            let item = value[i]
+            item["_index"] = i
+            list.push(item)
+          }
+          this.dataList = list
+        }
+        // 初始化组件
+        this.init()
+      },
+      immediate: true
+    }
+  }
 };
 </script>
 <style lang='scss' scoped>
